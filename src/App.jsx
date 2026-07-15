@@ -299,6 +299,7 @@ function TemplateManager({ open, onClose, templates, selectedId, onSelect, onCre
 }
 
 function ProjectWorkspace({ project, templates, onDeleteProject, onRenameProject, onRename, onAttach, onToggle, onAddItem, onDeleteItem, onDeleteList }) {
+  const [itemFilter, setItemFilter] = useState('open')
   return (
     <section className="project-workspace">
       <div className="project-topline">
@@ -316,11 +317,16 @@ function ProjectWorkspace({ project, templates, onDeleteProject, onRenameProject
       {project ? (
         <>
           <div className="project-actions">
-            <span>{project.lists.length ? `${project.lists.length} 个清单全部展开` : '这个项目还没有清单'}</span>
+            <span>{project.lists.length ? `${project.lists.length} 个清单` : '这个项目还没有清单'}</span>
+            <div className="filter-switch" role="group" aria-label="清单显示范围">
+              <button type="button" aria-pressed={itemFilter === 'open'} className={itemFilter === 'open' ? 'is-active' : ''} onClick={() => setItemFilter('open')}>未检查</button>
+              <button type="button" aria-pressed={itemFilter === 'all'} className={itemFilter === 'all' ? 'is-active' : ''} onClick={() => setItemFilter('all')}>全部</button>
+            </div>
           </div>
           <div className="project-lists">
             {project.lists.map((list) => {
               const checked = list.items.filter((item) => item.checked).length
+              const visibleItems = uncheckedFirst(list.items).filter((item) => itemFilter === 'all' || !item.checked)
               return (
                 <article className="project-list" key={list.id}>
                   <header className="list-heading">
@@ -332,7 +338,8 @@ function ProjectWorkspace({ project, templates, onDeleteProject, onRenameProject
                   </header>
                   <div className="progress" aria-hidden="true"><span style={{ width: `${list.items.length ? (checked / list.items.length) * 100 : 0}%` }} /></div>
                   <div className="checklist compact">
-                    {uncheckedFirst(list.items).map((item) => <CheckRow key={item.id} item={item} onToggle={() => onToggle(list.id, item.id)} onDelete={() => onDeleteItem(list.id, item.id)} />)}
+                    {visibleItems.map((item) => <CheckRow key={item.id} item={item} onToggle={() => onToggle(list.id, item.id)} onDelete={() => onDeleteItem(list.id, item.id)} />)}
+                    {!visibleItems.length ? <p className="filtered-empty">已全部检查</p> : null}
                     <AddRow onAdd={(text) => onAddItem(list.id, text)} />
                   </div>
                 </article>
