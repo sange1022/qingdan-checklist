@@ -109,6 +109,11 @@ input.project-title { min-width: min(420px, 58vw); }
 .project-empty-title { margin: 0; font-size: 36px; font-weight: 500; }
 .project-actions { min-height: 58px; display: flex; align-items: center; justify-content: space-between; gap: 16px; }
 .project-actions > span { color: var(--muted); font-size: 12px; }
+.filter-switch { padding: 2px; border: 1px solid var(--line); border-radius: 7px; display: inline-flex; align-items: center; background: #f8f8f8; }
+.filter-switch button { min-width: 54px; height: 28px; padding: 0 10px; border: 0; border-radius: 5px; background: transparent; color: var(--muted); font-size: 12px; cursor: pointer; }
+.filter-switch button:hover { color: #111; }
+.filter-switch button.is-active { background: #111; color: #fff; }
+.filtered-empty { min-height: 46px; margin: 0; border-bottom: 1px solid var(--line); display: flex; align-items: center; color: var(--muted); font-size: 12px; }
 .project-lists {
   display: grid;
   grid-auto-flow: column;
