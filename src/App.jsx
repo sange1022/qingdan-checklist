@@ -234,7 +234,7 @@ function TemplateRail({ templates, selectedId, onSelect, onCreate }) {
   )
 }
 
-function ProjectRail({ projects, selectedId, onSelect, onCreate }) {
+function ProjectRail({ projects, selectedId, onSelect, onDelete, onCreate }) {
   return (
     <aside className="project-rail">
       <div className="section-heading"><h2>项目</h2></div>
@@ -243,10 +243,13 @@ function ProjectRail({ projects, selectedId, onSelect, onCreate }) {
           const total = project.lists.reduce((sum, list) => sum + list.items.length, 0)
           const checked = project.lists.reduce((sum, list) => sum + list.items.filter((item) => item.checked).length, 0)
           return (
-            <button className={`project-link ${selectedId === project.id ? 'is-active' : ''}`} type="button" key={project.id} onClick={() => onSelect(project.id)}>
-              <span>{project.name}</span>
-              <small>{total ? `${checked}/${total}` : '空'}</small>
-            </button>
+            <div className="project-link-row" key={project.id}>
+              <button className={`project-link ${selectedId === project.id ? 'is-active' : ''}`} type="button" onClick={() => onSelect(project.id)}>
+                <span>{project.name}</span>
+                <small>{total ? `${checked}/${total}` : '空'}</small>
+              </button>
+              <button className="project-row-delete" type="button" onClick={() => onDelete(project.id)} aria-label={`删除项目“${project.name}”`} title="删除项目"><Icon name="trash" size={15} /></button>
+            </div>
           )
         })}
       </nav>
@@ -434,12 +437,12 @@ export default function App() {
     setModal(null)
   }
 
-  const deleteProject = () => {
-    const project = data.projects.find((item) => item.id === selectedProjectId)
+  const deleteProject = (projectId) => {
+    const project = data.projects.find((item) => item.id === projectId)
     if (!project || !window.confirm(`确定删除项目“${project.name}”吗？`)) return
     const remaining = data.projects.filter((item) => item.id !== project.id)
     setData((current) => ({ ...current, projects: remaining }))
-    setSelectedProjectId(remaining[0]?.id ?? '')
+    if (project.id === selectedProjectId) setSelectedProjectId(remaining[0]?.id ?? '')
   }
 
   const renameProject = (name) => setData((current) => ({
@@ -484,11 +487,11 @@ export default function App() {
         </div>
       </header>
       <div className="workspace">
-        <ProjectRail projects={data.projects} selectedId={selectedProject?.id} onSelect={setSelectedProjectId} onCreate={() => setModal('project')} />
+        <ProjectRail projects={data.projects} selectedId={selectedProject?.id} onSelect={setSelectedProjectId} onDelete={deleteProject} onCreate={() => setModal('project')} />
         <ProjectWorkspace
           project={selectedProject}
           templates={data.templates}
-          onDeleteProject={deleteProject}
+          onDeleteProject={() => deleteProject(selectedProjectId)}
           onRenameProject={renameProject}
           onRename={(listId, name) => updateProject((project) => ({ ...project, lists: project.lists.map((list) => list.id === listId ? { ...list, name } : list) }))}
           onAttach={() => setModal('attach')}
